@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RKCA Test Runner — ResettleAid Gemini Framework</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --navy:   #1a2744;
+  --teal:   #1d7a6e;
+  --teal-l: #e6f4f2;
+  --teal-m: #b8ddd9;
+  --amber:  #c67c1a;
+  --amber-l:#fdf3e3;
+  --red:    #b93535;
+  --red-l:  #fdeaea;
+  --green:  #2a6b3a;
+  --green-l:#eaf3ec;
+  --ink:    #1c1c1e;
+  --ink2:   #3d3d40;
+  --muted:  #6b6b70;
+  --rule:   #e2e2e6;
+  --bg:     #f7f7f5;
+  --surface:#ffffff;
+  --surface2:#f2f2ef;
+  --mono:   'DM Mono', monospace;
+  --serif:  'Fraunces', serif;
+  --sans:   'DM Sans', sans-serif;
+  --radius: 10px;
+  --shadow: 0 2px 12px rgba(0,0,0,.07);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:15px;-webkit-font-smoothing:antialiased}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);min-height:100vh;display:grid;grid-template-rows:auto 1fr auto}
+
+/* ── HEADER ── */
+header{background:var(--navy);padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100}
+.hdr-brand{display:flex;align-items:center;gap:12px}
+.hdr-logo{width:32px;height:32px;border-radius:6px;background:var(--teal);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.hdr-logo svg{width:18px;height:18px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.hdr-name{font-family:var(--serif);font-size:1.05rem;font-weight:300;color:#fff;letter-spacing:.01em}
+.hdr-name span{color:var(--teal-m);font-weight:600}
+.hdr-badge{font-family:var(--mono);font-size:.68rem;color:rgba(255,255,255,.45);letter-spacing:.08em;text-transform:uppercase}
+.hdr-meta{display:flex;align-items:center;gap:20px}
+.hdr-pill{font-size:.72rem;font-family:var(--mono);padding:4px 10px;border-radius:99px;border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.6);letter-spacing:.04em}
+.hdr-pill.live{border-color:rgba(29,122,110,.7);color:#5dcaa5;background:rgba(29,122,110,.12)}
+
+/* ── LAYOUT ── */
+.shell{max-width:1280px;margin:0 auto;width:100%;padding:28px 32px;display:grid;grid-template-columns:300px 1fr;gap:24px;align-items:start}
+
+/* ── SIDEBAR ── */
+.sidebar{display:flex;flex-direction:column;gap:16px;position:sticky;top:88px}
+.panel{background:var(--surface);border:1px solid var(--rule);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.panel-hdr{background:var(--navy);color:#fff;padding:11px 16px;font-size:.72rem;font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.panel-hdr .dot{width:7px;height:7px;border-radius:50%;background:var(--teal-m);flex-shrink:0}
+.panel-body{padding:14px}
+
+/* function selector */
+.fn-list{display:flex;flex-direction:column;gap:6px}
+.fn-btn{width:100%;text-align:left;background:var(--surface2);border:1px solid var(--rule);border-radius:7px;padding:10px 12px;cursor:pointer;transition:all .15s;font-family:var(--sans)}
+.fn-btn:hover{border-color:var(--teal);background:var(--teal-l)}
+.fn-btn.active{border-color:var(--teal);background:var(--teal-l);box-shadow:0 0 0 3px rgba(29,122,110,.12)}
+.fn-btn-name{font-size:.82rem;font-weight:600;color:var(--navy)}
+.fn-btn-desc{font-size:.72rem;color:var(--muted);margin-top:2px}
+.fn-tag{font-family:var(--mono);font-size:.62rem;padding:2px 6px;border-radius:4px;background:var(--teal-l);color:var(--teal);margin-top:4px;display:inline-block}
+
+/* test cases */
+.tc-list{display:flex;flex-direction:column;gap:5px}
+.tc-btn{width:100%;text-align:left;background:none;border:1px solid var(--rule);border-radius:6px;padding:8px 10px;cursor:pointer;transition:all .15s;font-family:var(--sans);display:flex;align-items:center;gap:8px}
+.tc-btn:hover{background:var(--surface2);border-color:var(--teal)}
+.tc-btn.active{background:var(--teal-l);border-color:var(--teal)}
+.tc-id{font-family:var(--mono);font-size:.65rem;color:var(--teal);font-weight:500;flex-shrink:0;width:36px}
+.tc-label{font-size:.75rem;color:var(--ink2);flex:1;line-height:1.3}
+.tc-complexity{font-size:.6rem;padding:2px 5px;border-radius:3px;font-family:var(--mono);flex-shrink:0}
+.cx-low{background:#eaf3ec;color:#2a6b3a}
+.cx-med{background:#fdf3e3;color:#c67c1a}
+.cx-high{background:#fdeaea;color:#b93535}
+.cx-vhigh{background:#f3e9f7;color:#6b35a8}
+
+/* api key */
+.api-input{width:100%;border:1px solid var(--rule);border-radius:7px;padding:9px 11px;font-family:var(--mono);font-size:.72rem;color:var(--ink);background:var(--surface2);outline:none;transition:border .15s}
+.api-input:focus{border-color:var(--teal);background:#fff}
+.api-note{font-size:.68rem;color:var(--muted);margin-top:6px;line-height:1.5}
+
+/* version toggle */
+.ver-toggle{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.ver-btn{padding:8px;border-radius:7px;border:1px solid var(--rule);background:var(--surface2);font-family:var(--mono);font-size:.72rem;cursor:pointer;text-align:center;transition:all .15s;color:var(--muted)}
+.ver-btn.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+
+/* ── MAIN PANEL ── */
+.main{display:flex;flex-direction:column;gap:20px}
+.input-card{background:var(--surface);border:1px solid var(--rule);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.ic-hdr{padding:14px 20px;border-bottom:1px solid var(--rule);display:flex;align-items:center;justify-content:space-between}
+.ic-title{font-family:var(--serif);font-size:1.05rem;font-weight:300;color:var(--navy)}
+.ic-subtitle{font-size:.75rem;color:var(--muted);margin-top:2px}
+.ic-body{padding:18px 20px;display:flex;flex-direction:column;gap:14px}
+
+textarea{width:100%;border:1px solid var(--rule);border-radius:8px;padding:12px 14px;font-family:var(--mono);font-size:.78rem;color:var(--ink);background:var(--surface2);resize:vertical;outline:none;transition:border .15s;line-height:1.6}
+textarea:focus{border-color:var(--teal);background:#fff}
+.prompt-preview{background:var(--navy);border-radius:8px;padding:14px 16px;overflow:auto}
+.prompt-preview pre{font-family:var(--mono);font-size:.7rem;color:rgba(255,255,255,.8);white-space:pre-wrap;line-height:1.7}
+.prompt-preview .ph{color:#5dcaa5}
+.prompt-preview .kw{color:#f9cb42}
+.prompt-preview .cm{color:rgba(255,255,255,.35)}
+
+.run-bar{display:flex;align-items:center;gap:12px}
+.run-btn{background:var(--teal);color:#fff;border:none;border-radius:8px;padding:11px 28px;font-family:var(--sans);font-size:.85rem;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:8px;letter-spacing:.01em}
+.run-btn:hover{background:#176358;transform:translateY(-1px);box-shadow:0 4px 12px rgba(29,122,110,.3)}
+.run-btn:active{transform:translateY(0)}
+.run-btn:disabled{background:var(--muted);transform:none;box-shadow:none;cursor:not-allowed}
+.clear-btn{background:none;border:1px solid var(--rule);border-radius:8px;padding:10px 18px;font-family:var(--sans);font-size:.82rem;color:var(--muted);cursor:pointer;transition:all .15s}
+.clear-btn:hover{border-color:var(--ink2);color:var(--ink2)}
+
+/* ── OUTPUT ── */
+.output-card{background:var(--surface);border:1px solid var(--rule);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.oc-hdr{padding:14px 20px;border-bottom:1px solid var(--rule);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.oc-title{font-family:var(--serif);font-size:1rem;font-weight:300;color:var(--navy)}
+.oc-meta{display:flex;align-items:center;gap:10px}
+.meta-pill{font-family:var(--mono);font-size:.65rem;padding:3px 8px;border-radius:4px}
+.mp-fn{background:var(--teal-l);color:var(--teal)}
+.mp-ver{background:var(--amber-l);color:var(--amber)}
+.mp-tc{background:var(--surface2);color:var(--muted)}
+
+.oc-body{padding:20px}
+.response-text{font-family:var(--sans);font-size:.88rem;line-height:1.8;color:var(--ink2);white-space:pre-wrap}
+
+/* flags */
+.flag{padding:10px 14px;border-radius:7px;margin-bottom:12px;font-size:.8rem;font-weight:500;display:flex;align-items:flex-start;gap:8px}
+.flag-urgent{background:var(--red-l);color:var(--red);border:1px solid rgba(185,53,53,.2)}
+.flag-verify{background:var(--amber-l);color:var(--amber);border:1px solid rgba(198,124,26,.2)}
+.flag-icon{font-size:1rem;flex-shrink:0;margin-top:1px}
+
+/* thinking animation */
+.thinking{display:flex;align-items:center;gap:10px;padding:20px;color:var(--muted);font-size:.82rem}
+.thinking-dots{display:flex;gap:4px}
+.thinking-dots span{width:6px;height:6px;border-radius:50%;background:var(--teal);animation:bounce .9s ease-in-out infinite}
+.thinking-dots span:nth-child(2){animation-delay:.15s}
+.thinking-dots span:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
+
+.empty-state{padding:48px 20px;text-align:center;color:var(--muted)}
+.empty-icon{font-size:2.5rem;margin-bottom:12px;opacity:.3}
+.empty-title{font-family:var(--serif);font-size:1.1rem;font-weight:300;color:var(--ink2);margin-bottom:6px}
+.empty-sub{font-size:.8rem;line-height:1.6}
+
+/* ── SCORING ── */
+.score-card{background:var(--surface);border:1px solid var(--rule);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.sc-hdr{padding:13px 20px;border-bottom:1px solid var(--rule);display:flex;align-items:center;justify-content:space-between}
+.sc-title{font-family:var(--serif);font-size:.95rem;font-weight:300;color:var(--navy)}
+.sc-body{padding:18px 20px;display:flex;flex-direction:column;gap:14px}
+.score-row{display:flex;align-items:center;gap:12px}
+.score-label{font-size:.78rem;font-weight:500;color:var(--ink2);width:110px;flex-shrink:0}
+.score-stars{display:flex;gap:5px}
+.star{width:28px;height:28px;border-radius:5px;border:1px solid var(--rule);background:var(--surface2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;font-family:var(--mono);color:var(--muted);font-size:.75rem}
+.star:hover{border-color:var(--amber);background:var(--amber-l);color:var(--amber)}
+.star.selected{border-color:var(--amber);background:var(--amber);color:#fff}
+.score-val{font-family:var(--mono);font-size:.75rem;color:var(--muted);width:24px}
+.score-avg{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--surface2);border-radius:7px;border:1px solid var(--rule)}
+.avg-label{font-size:.78rem;color:var(--muted)}
+.avg-val{font-family:var(--mono);font-size:1.2rem;font-weight:500;color:var(--navy)}
+.save-btn{width:100%;background:var(--navy);color:#fff;border:none;border-radius:7px;padding:10px;font-family:var(--sans);font-size:.82rem;font-weight:500;cursor:pointer;transition:all .15s}
+.save-btn:hover{background:#253660}
+.notes-input{width:100%;border:1px solid var(--rule);border-radius:7px;padding:9px 12px;font-family:var(--sans);font-size:.78rem;color:var(--ink);background:var(--surface2);resize:vertical;outline:none;transition:border .15s}
+.notes-input:focus{border-color:var(--teal);background:#fff}
+
+/* ── LOG TABLE ── */
+.log-card{background:var(--surface);border:1px solid var(--rule);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.log-hdr{padding:13px 20px;border-bottom:1px solid var(--rule);display:flex;align-items:center;justify-content:space-between}
+.log-title{font-family:var(--serif);font-size:.95rem;font-weight:300;color:var(--navy)}
+.log-actions{display:flex;gap:8px}
+.lg-btn{font-size:.72rem;padding:5px 12px;border-radius:5px;border:1px solid var(--rule);background:none;cursor:pointer;color:var(--muted);font-family:var(--mono);transition:all .12s}
+.lg-btn:hover{border-color:var(--navy);color:var(--navy)}
+.log-body{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.75rem}
+thead{background:var(--surface2)}
+th{text-align:left;padding:9px 14px;font-family:var(--mono);font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500;border-bottom:1px solid var(--rule);white-space:nowrap}
+td{padding:9px 14px;border-bottom:1px solid var(--rule);color:var(--ink2);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface2)}
+.score-chip{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;font-family:var(--mono);font-size:.7rem;font-weight:500}
+.sc-5{background:#eaf3ec;color:#2a6b3a}
+.sc-4{background:#e8f0fa;color:#1a5aab}
+.sc-3{background:#fdf3e3;color:#c67c1a}
+.sc-2{background:#fdeaea;color:#b93535}
+.sc-1{background:#f3e9f7;color:#6b35a8}
+.sc-na{background:var(--surface2);color:var(--muted)}
+.pass-badge{font-size:.65rem;padding:2px 7px;border-radius:3px;font-family:var(--mono)}
+.pass-yes{background:#eaf3ec;color:#2a6b3a}
+.pass-no{background:#fdeaea;color:#b93535}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:2px;background:var(--surface2);border-radius:8px;padding:3px;width:fit-content}
+.tab{font-size:.78rem;padding:7px 16px;border-radius:6px;border:none;background:none;cursor:pointer;color:var(--muted);font-family:var(--sans);font-weight:500;transition:all .15s}
+.tab.active{background:var(--surface);color:var(--navy);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+
+/* ── MODEL SELECTOR ── */
+.model-select{width:100%;border:1px solid var(--rule);border-radius:7px;padding:9px 11px;font-family:var(--mono);font-size:.72rem;color:var(--ink);background:var(--surface2);outline:none;transition:border .15s;cursor:pointer;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b6b70' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+.model-select:focus{border-color:var(--teal);background-color:#fff}
+.model-note{font-size:.68rem;color:var(--muted);margin-top:6px;line-height:1.5}
+.model-info{display:flex;flex-direction:column;gap:3px;margin-top:8px;padding-top:8px;border-top:1px solid var(--rule)}
+.mi-row{display:flex;align-items:center;justify-content:space-between;font-size:.68rem}
+.mi-label{color:var(--muted)}
+.mi-val{font-family:var(--mono);color:var(--ink2)}
+.mi-badge{font-family:var(--mono);font-size:.6rem;padding:2px 6px;border-radius:3px}
+.mib-fast{background:#eaf3ec;color:#2a6b3a}
+.mib-smart{background:#e8f0fa;color:#1a5aab}
+.mib-power{background:#f3e9f7;color:#6b35a8}
+.mib-lite{background:var(--surface2);color:var(--muted)}
+
+/* ── FOOTER ── */
+footer{padding:14px 32px;border-top:1px solid var(--rule);display:flex;align-items:center;justify-content:space-between;background:var(--surface)}
+.ft-left{font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.05em}
+.ft-right{font-size:.68rem;color:var(--muted)}
+
+/* ── TOAST ── */
+.toast-wrap{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:8px;z-index:999}
+.toast{background:var(--navy);color:#fff;padding:10px 16px;border-radius:8px;font-size:.78rem;font-family:var(--sans);box-shadow:0 4px 20px rgba(0,0,0,.2);animation:slideIn .2s ease;display:flex;align-items:center;gap:8px}
+@keyframes slideIn{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){.shell{grid-template-columns:1fr}.sidebar{position:static}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hdr-brand">
+    <div class="hdr-logo">
+      <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    </div>
+    <div>
+      <div class="hdr-name">RKCA <span>Test Runner</span></div>
+      <div class="hdr-badge">ResettleAid Knowledge &amp; Case Assistant — Gemini Evaluation Framework</div>
+    </div>
+  </div>
+  <div class="hdr-meta">
+    <span class="hdr-pill">PAID/PREPAY TIER</span>
+    <span class="hdr-pill">v2.1 Stable</span>
+    <span class="hdr-pill live" id="status-pill">● Ready</span>
+  </div>
+</header>
+
+<div class="shell">
+
+  <!-- ── SIDEBAR ── -->
+  <div class="sidebar">
+
+    <!-- API Key -->
+    <div class="panel">
+      <div class="panel-hdr"><span class="dot"></span>Gemini Configuration</div>
+      <div class="panel-body">
+        <input class="api-input" type="password" id="api-key" placeholder="AIzaSy..." autocomplete="off"/>
+        <p class="api-note">Enter your <strong>Google AI Studio</strong> API key. Ensure billing is enabled for your Google Cloud project to use Gemini 2.x models.</p>
+      </div>
+    </div>
+
+    <!-- Model Selector -->
+    <div class="panel">
+      <div class="panel-hdr"><span class="dot"></span>Model Selection</div>
+      <div class="panel-body">
+        <select class="model-select" id="model-select" onchange="updateModelInfo()">
+          <optgroup label="── Gemini 2.5 Models ──">
+            <option value="gemini-2.5-flash" selected>Gemini 2.5 Flash (Recommended)</option>
+            <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+            <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite</option>
+          </optgroup>
+          <optgroup label="── Gemini 3.x Models ──">
+            <option value="gemini-3.5-flash">Gemini 3.5 Flash</option>
+            <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash Lite</option>
+          </optgroup>
+        </select>
+        <div class="model-info" id="model-info">
+          <div class="mi-row"><span class="mi-label">Provider</span><span class="mi-val">Google DeepMind</span></div>
+          <div class="mi-row"><span class="mi-label">Profile</span><span class="mi-badge mib-smart">Balanced</span></div>
+          <div class="mi-row"><span class="mi-label">Method</span><span class="mi-val">v1beta REST</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Function Selector -->
+    <div class="panel">
+      <div class="panel-hdr"><span class="dot"></span>Function</div>
+      <div class="panel-body">
+        <div class="fn-list">
+          <button class="fn-btn active" onclick="selectFunction('policy')" id="fn-policy">
+            <div class="fn-btn-name">Layer 1 — Policy Navigation</div>
+            <div class="fn-btn-desc">Retrieve and explain SOP procedures</div>
+            <span class="fn-tag">system + policy prompt</span>
+          </button>
+          <button class="fn-btn" onclick="selectFunction('priority')" id="fn-priority">
+            <div class="fn-btn-name">Layer 2 — Case Prioritisation</div>
+            <div class="fn-btn-desc">Assess urgency, rank actions by deadline</div>
+            <span class="fn-tag">chain-of-thought</span>
+          </button>
+          <button class="fn-btn" onclick="selectFunction('workflow')" id="fn-workflow">
+            <div class="fn-btn-name">Layer 3 — Workflow Coordination</div>
+            <div class="fn-btn-desc">Map dependencies and action sequence</div>
+            <span class="fn-tag">dependency mapping</span>
+          </button>
+          <button class="fn-btn" onclick="selectFunction('combined')" id="fn-combined">
+            <div class="fn-btn-name">Combined (All Three)</div>
+            <div class="fn-btn-desc">Full assessment — all layers in one pass</div>
+            <span class="fn-tag">stress test</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Version Toggle -->
+    <div class="panel">
+      <div class="panel-hdr"><span class="dot"></span>Prompt Version</div>
+      <div class="panel-body">
+        <div class="ver-toggle">
+          <button class="ver-btn active" onclick="selectVersion(1)" id="ver-1">Version 1</button>
+          <button class="ver-btn" onclick="selectVersion(2)" id="ver-2">Version 2</button>
+        </div>
+        <p class="api-note" style="margin-top:8px" id="ver-note">V1: Initial design. Run this first to generate baseline scores.</p>
+      </div>
+    </div>
+
+    <!-- Test Cases -->
+    <div class="panel">
+      <div class="panel-hdr"><span class="dot"></span>Test Cases</div>
+      <div class="panel-body">
+        <div class="tc-list" id="tc-list"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── MAIN ── -->
+  <div class="main">
+
+    <!-- Input -->
+    <div class="input-card">
+      <div class="ic-hdr">
+        <div>
+          <div class="ic-title" id="ic-title">Policy Navigation — Caseworker Query</div>
+          <div class="ic-subtitle" id="ic-subtitle">Enter a caseworker question or family case profile below</div>
+        </div>
+        <div class="tabs">
+          <button class="tab active" onclick="switchTab('input')">Input</button>
+          <button class="tab" onclick="switchTab('prompt')">Prompt Preview</button>
+        </div>
+      </div>
+      <div class="ic-body">
+        <div id="tab-input">
+          <textarea id="user-input" rows="9" placeholder="Enter a caseworker question or paste a family profile here…"></textarea>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+            <div class="run-bar">
+              <button class="run-btn" id="run-btn" onclick="runTest()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                Run Test
+              </button>
+              <button class="clear-btn" onclick="clearAll()">Clear</button>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:3px;text-align:right">
+            <div style="font-size:.72rem;color:var(--muted);font-family:var(--mono)" id="token-hint"></div>
+            <div style="font-size:.68rem;color:var(--muted);font-family:var(--mono)" id="active-indicator"></div>
+          </div>
+          </div>
+        </div>
+        <div id="tab-prompt" style="display:none">
+          <div class="prompt-preview"><pre id="prompt-preview-text">Select a function and version to preview the system prompt.</pre></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Output -->
+    <div class="output-card">
+      <div class="oc-hdr">
+        <div class="oc-title">AI Response</div>
+        <div class="oc-meta">
+          <span class="meta-pill mp-fn" id="mp-fn">Policy Nav</span>
+          <span class="meta-pill mp-ver" id="mp-ver">V1</span>
+          <span class="meta-pill mp-tc" id="mp-tc">—</span>
+        </div>
+      </div>
+      <div class="oc-body" id="output-body">
+        <div class="empty-state">
+          <div class="empty-icon">⬡</div>
+          <div class="empty-title">No response yet</div>
+          <div class="empty-sub">Select a function and test case, then press Run Test.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scoring -->
+    <div class="score-card">
+      <div class="sc-hdr">
+        <div class="sc-title">Score this Response</div>
+        <span style="font-size:.72rem;color:var(--muted);font-family:var(--mono)">1 = Fail &nbsp;·&nbsp; 5 = Excellent</span>
+      </div>
+      <div class="sc-body">
+        <div class="score-row">
+          <span class="score-label">Accuracy</span>
+          <div class="score-stars" id="stars-accuracy"></div>
+          <span class="score-val" id="val-accuracy">—</span>
+        </div>
+        <div class="score-row">
+          <span class="score-label">Completeness</span>
+          <div class="score-stars" id="stars-completeness"></div>
+          <span class="score-val" id="val-completeness">—</span>
+        </div>
+        <div class="score-row">
+          <span class="score-label">Clarity</span>
+          <div class="score-stars" id="stars-clarity"></div>
+          <span class="score-val" id="val-clarity">—</span>
+        </div>
+        <div class="score-avg">
+          <span class="avg-label">Average score</span>
+          <span class="avg-val" id="avg-score">—</span>
+        </div>
+        <textarea class="notes-input" id="score-notes" rows="2" placeholder="Observation notes — e.g. dependency missed in Step 4..."></textarea>
+        <button class="save-btn" onclick="saveScore()">Save Score to Log</button>
+      </div>
+    </div>
+
+    <!-- Results Log -->
+    <div class="log-card">
+      <div class="log-hdr">
+        <div class="log-title">Results Log</div>
+        <div class="log-actions">
+          <button class="lg-btn" onclick="exportCSV()">Export CSV</button>
+          <button class="lg-btn" onclick="clearLog()">Clear</button>
+        </div>
+      </div>
+      <div class="log-body">
+        <table id="log-table">
+          <thead>
+            <tr>
+              <th>TC</th>
+              <th>Function</th>
+              <th>Ver</th>
+              <th>Model</th>
+              <th>Acc</th>
+              <th>Comp</th>
+              <th>Clar</th>
+              <th>Avg</th>
+              <th>Pass</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody id="log-body">
+            <tr><td colspan="10" style="text-align:center;color:var(--muted);padding:24px;font-size:.78rem">No results logged yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <div class="ft-left">RKCA TEST RUNNER · DLMPAIECPT01 · RESETTLEAID NAIROBI</div>
+  <div class="ft-right">Powered by Gemini AI · v2.1 Stable Models Patch</div>
+</footer>
+
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════════════
+let currentFunction = 'policy';
+let currentVersion  = 1;
+let currentTC       = null;
+let scores          = {accuracy:0, completeness:0, clarity:0};
+let logEntries      = [];
+let lastResponse    = '';
+
+// ════════════════════════════════════════════════════════════════
+// FULL KNOWLEDGE BASE
+// ════════════════════════════════════════════════════════════════
+const KB = `
+=== SOP-001: INITIAL FAMILY INTAKE PROCEDURE ===
+Mandatory documents at intake: UNHCR Registration Card (all members), DRS Mandate Letter, birth certificates for children (required before school enrolment SOP-019), medical/vaccination records (required for NHIF registration SOP-012).
+MANGO milestones set at intake: Housing Assessment Day 7, NHIF/Healthcare Day 14, School Enrolment Day 21, Cash Assistance Day 7, Language/Livelihoods Day 30.
+If family is homeless on arrival: activate SOP-007 Emergency Protocol same day — do not wait for Day 7 milestone.
+Vulnerability flags must be escalated to duty supervisor same day. Supervisor must countersign Form RA-02.
+
+=== SOP-007: HOUSING PLACEMENT ===
+CRITICAL DEPENDENCIES: Proof of Residence Letter (Form RA-09) is REQUIRED before: school enrolment (SOP-019), cash assistance registration (SOP-023), NHIF registration (SOP-012).
+Caseworkers must prioritise housing above school, cash assistance, and NHIF when these compete.
+Rent ceiling: KES 12,000/month for up to 4 persons; KES 16,000 for 5 or more.
+After signing: issue Proof of Residence Letter (Form RA-09) immediately — 3 original copies.
+Day 14 deadline: signed tenancy agreement and Proof of Residence Letter must be issued.
+
+=== SOP-012: NHIF / UNHCR HEALTH REGISTRATION ===
+PREREQUISITES: SOP-001 intake complete; Proof of Residential Address (Form RA-09 from SOP-007).
+Two pathways: (1) NHIF Refugee Cover Scheme — KES 500 annual premium. (2) UNHCR Kenya Health Programme — interim coverage.
+Day 14 deadline: NHIF registration appointment completed and NHIF number recorded in MANGO.
+Children under 18 registered as dependants on primary applicant's account.
+MHPSS (mental health) referral does NOT require NHIF first — contact: mhpss@resettleaid.or.ke.
+
+=== SOP-019: CHILD SCHOOL ENROLMENT ===
+MANDATORY PREREQUISITES:
+  1. Proof of Residence Letter (Form RA-09, from SOP-007) — ALL schools require this. Cannot enrol without it.
+  2. Vaccination records — from country-of-origin card OR UNHCR health registration.
+Day 21 deadline from arrival. Non-enrolment beyond Day 21 = child protection escalation required.
+
+=== SOP-023: CASH ASSISTANCE ELIGIBILITY (KENYA REFUGEES ACT 2021) ===
+Three programmes: (1) DRS Transitional Cash Assistance (TCA), (2) UNHCR Multipurpose Cash Grant (MPCG), (3) Vulnerable Household Supplement (VHS).
+TCA eligibility: valid UNHCR card, valid DRS Mandate Letter, verified Nairobi address, arrived within last 6 months.
+LATE-ARRIVING FAMILY MEMBERS (Section 29(4)): Family members arriving separately are subject to INDEPENDENT eligibility assessment. Their 6-month window begins from THEIR OWN DRS-recorded arrival date, not the primary applicant's date. [VERIFY] required.
+Day 7 deadline: TCA application submitted to DRS.
+
+=== SOP-031: LANGUAGE AND LIVELIHOODS TRAINING ===
+Administered by: UNHCR Kenya in partnership with Don Bosco Kenya.
+Eligibility: All adult refugees (18+) with valid UNHCR registration and DRS Mandate Letter. Arrived within 12 months.
+Day 30 deadline from arrival: registration must be completed.
+Late-arriving family members who arrived separately have their own Day 30 deadline starting from THEIR OWN arrival date. [VERIFY] required for any eligibility edge case.
+Available programmes: Swahili/English language classes (3 months), vocational skills training (6 months), business development support.
+Registration: At Don Bosco Nairobi Centre, Makadara (Mon-Fri 08:00-15:00) or UNHCR Gigiri office.
+Contact: donbosco.nairobi@donbosco.or.ke / +254 20 555 1000.
+
+=== REF-008: PARTNER HEALTHCARE PROVIDER NETWORK ===
+NHIF or UNHCR health number REQUIRED before any specialist referral can be processed.
+Mental health / MHPSS referrals DO NOT require NHIF first — contact ResettleAid MHPSS Coordinator directly.
+MHPSS Coordinator: mhpss@resettleaid.or.ke / +254 700 111 222.
+Partner clinics (UNHCR-approved):
+  - Eastleigh Health Centre (Motichand House, 1st Ave, Eastleigh) — general + MHPSS
+  - Riruta Health Centre (Kawangware) — general
+  - MSF Mathare Clinic (Mathare) — general + MHPSS
+Specialist referral process: Complete Form RA-12 (Specialist Referral Form), attach GP letter + NHIF/UNHCR number + medical history summary. Send to provider as specified per clinic.
+Follow-up: Set MANGO reminder for 7 days to confirm appointment received.
+
+=== GOV-2026: RESETTLEMENT DEADLINE CALENDAR ===
+  Day 0: Intake
+  Day 7: Housing assessment; TCA application
+  Day 14: NHIF registration; signed tenancy agreement
+  Day 21: School enrolment (all children 4-17)
+  Day 30: Language/livelihoods registration
+  Day 180: TCA eligibility expires
+`;
+
+const SYSTEM_BASE = `You are RKCA (ResettleAid Knowledge and Case Assistant) for ResettleAid Nairobi.
+ROLE: Assist junior caseworkers with policy navigation, prioritization, and workflow mapping.
+KNOWLEDGE: Only use provided SOPs (001, 007, 012, 019, 023) and GOV-2026 calendar.
+GROUNDING: Only provide info traceable to the docs. If outside scope, say: "This falls outside my current knowledge base."
+CONFIDENCE: If uncertain, flag explicitly: "[VERIFY]".
+ESCALATION: Trigger [URGENT] for deadlines < 72h, medical emergencies, or legal status risk.
+
+--- KNOWLEDGE BASE ---
+${KB}
+`;
+
+// ════════════════════════════════════════════════════════════════
+// FULL PROMPTS
+// ════════════════════════════════════════════════════════════════
+const FN_PROMPTS = {
+  policy: {
+    v1: `FUNCTION: Policy Navigation
+
+The caseworker has asked a procedural question. Your task is to:
+
+Step 1 - Identify the relevant SOP: State which SOP or reference document contains the answer. State the document name and section explicitly.
+Step 2 - Summarise the procedure: Explain the procedure in plain language, suitable for a junior caseworker. Paraphrase, do not quote verbatim.
+Step 3 - List required documents or prerequisites.
+Step 4 - Flag dependencies: If this procedure depends on another process being completed first, state clearly: Note: This step requires [X] to be completed first.
+Step 5 - Escalation check: If the question involves a benefit eligibility determination, add: [VERIFY] Eligibility decisions must be confirmed by a supervisor.
+
+CASEWORKER QUESTION:`,
+    v2: `FUNCTION: Policy Navigation (Version 2 - Enhanced)
+
+Step 1 - Identify the relevant SOP: Name the document and section explicitly.
+Step 2 - Summarise the procedure in plain language for a junior caseworker.
+Step 3 - List ALL required documents and prerequisites.
+Step 4 - MANDATORY DEPENDENCY CHECK: Cross-reference against the standard dependency map:
+  - Housing (SOP-007) BLOCKS: school enrolment, cash assistance, NHIF registration
+  - NHIF registration (SOP-012) BLOCKS: specialist referrals
+  - School enrolment (SOP-019) REQUIRES: proof of residence + vaccination records
+For each dependency found, state: Dependency identified: [X] must be completed before [Y].
+Step 5 - Deadline alert: State the relevant deadline from GOV-2026.
+Step 6 - Escalation check: Add [VERIFY] for any eligibility determination.
+
+OUTPUT FORMAT:
+SOP Reference: [document name]
+Procedure Summary: [plain language]
+Required Documents: [list]
+Dependencies: [list or None identified]
+Deadline: [from GOV-2026]
+Flags: [VERIFY / URGENT if applicable]
+
+CASEWORKER QUESTION:`
+  },
+  priority: {
+    v1: `FUNCTION: Case Prioritisation
+
+The caseworker has provided a family case profile. Produce a structured priority assessment.
+
+REASONING PROCESS (work through each step before producing output):
+Step 1 - List all active procedural items: Identify every incomplete procedure.
+Step 2 - Assign deadlines: State the known deadline for each item from GOV-2026. If unknown: Deadline unknown - confirm with GOV-2026.
+Step 3 - Assess consequences of inaction: What happens if each deadline is missed? Reference the relevant SOP.
+Step 4 - Rank by priority:
+  Priority 1 (Critical): Deadline within 14 days OR consequence involves legal status or financial suspension
+  Priority 2 (High): Deadline within 30 days OR blocks a Priority 1 item
+  Priority 3 (Standard): All other items
+
+OUTPUT FORMAT:
+[PRIORITY ASSESSMENT - Family: {name/ID}]
+CRITICAL ACTIONS: [list]
+HIGH PRIORITY: [list]
+STANDARD: [list]
+MISSING INFORMATION: [gaps that prevent full assessment]
+
+CASE PROFILE:`,
+    v2: `FUNCTION: Case Prioritisation (Version 2 - Enhanced)
+
+REASONING PROCESS:
+Step 1 - List all active procedural items from the profile.
+Step 2 - Assign deadlines from GOV-2026.
+Step 3 - Assess consequences using GOV-2026 consequence table (CRITICAL/HIGH/MEDIUM).
+Step 4 - Apply DUAL ranking criteria:
+  Priority 1 (Critical): Deadline within 14 days OR CRITICAL/HIGH consequence level
+  Priority 2 (High): Deadline within 30 days OR HIGH consequence OR blocks a Priority 1 item
+  Priority 3 (Standard): All other items
+  NOTE: High-consequence items without imminent deadlines (e.g. unregistered healthcare for chronically ill member) must be Priority 1.
+Step 5 - Check for 72-hour deadlines and trigger [URGENT] if found.
+
+OUTPUT FORMAT:
+[PRIORITY ASSESSMENT - Family: {name/ID}]
+CRITICAL (act within 14 days or immediately):
+  - [item] | Deadline: [day] | Consequence: [from GOV-2026] | SOP: [reference]
+HIGH PRIORITY (act within 30 days):
+  - [item] | Deadline: [day] | Blocks: [downstream item]
+STANDARD: [list]
+DEPENDENCY ALERTS: [items blocked by incomplete prerequisites]
+MISSING INFORMATION: [gaps]
+
+CASE PROFILE:`
+  },
+  workflow: {
+    v1: `FUNCTION: Workflow Coordination
+
+Map the dependencies between pending actions and produce a sequenced action plan.
+
+Step 1 - Identify dependencies: For each action, state (a) prerequisites and (b) downstream effects. Reference the relevant SOP.
+Step 2 - Identify blockers: State: [Action X] is blocked by: [Action Y] - Reason: [SOP reference]
+Step 3 - Produce action sequence: List actions in the order they must be completed. Group parallel actions together.
+Step 4 - Flag missing documents: List documents not yet obtained that are blocking progress.
+
+OUTPUT FORMAT:
+[WORKFLOW MAP - Family: {name/ID}]
+IMMEDIATELY ACTIONABLE: [actions with no blockers]
+BLOCKED ACTIONS: [action - blocked by - reason]
+RECOMMENDED SEQUENCE: [numbered order]
+MISSING DOCUMENTS: [list]
+
+PENDING ACTIONS:`,
+    v2: `FUNCTION: Workflow Coordination (Version 2 - Enhanced)
+
+COMPLETENESS CHECK (from SOP-001 standard milestones - verify all are present):
+  - Housing assessment / placement (Day 7)
+  - TCA cash assistance application (Day 7)
+  - NHIF registration (Day 14)
+  - UNHCR health programme registration (Day 14)
+  - School enrolment for all children 4-17 (Day 21)
+  - Language/livelihoods training (Day 30)
+Flag any standard milestones missing from the provided list.
+
+Then produce the workflow map:
+Step 1 - Dependency mapping: prerequisites and downstream effects per action with SOP reference.
+Step 2 - Blockers: [Action X] is BLOCKED by: [Action Y] - Reason: [SOP]
+Step 3 - Numbered action sequence with parallel actions grouped.
+Step 4 - Missing documents that block progress.
+
+OUTPUT FORMAT:
+[WORKFLOW MAP - Family: {name/ID}]
+COMPLETENESS ALERTS: [standard milestones missing]
+IMMEDIATELY ACTIONABLE: [no blockers]
+BLOCKED ACTIONS: [action - blocked by - SOP reason]
+RECOMMENDED SEQUENCE: [numbered]
+MISSING DOCUMENTS: [list]
+
+PENDING ACTIONS:`
+  },
+  combined: {
+    v1: `FUNCTION: Combined Assessment (All Three Layers)
+
+Produce a complete assessment covering all three functions.
+
+SECTION 1 - POLICY NAVIGATION: Identify relevant SOPs. Summarise key procedures and required documents.
+SECTION 2 - CASE PRIORITISATION: Rank all incomplete procedures (Critical/High/Standard). State consequences.
+SECTION 3 - WORKFLOW COORDINATION: Map dependency chain. State blocked actions, immediately actionable items, recommended sequence.
+SECTION 4 - FLAGS: State any [URGENT] or [VERIFY] flags.
+
+CASE PROFILE:`,
+    v2: `FUNCTION: Combined Assessment - Version 2 (All Three Layers, Enhanced)
+
+SECTION 1 - POLICY NAVIGATION: Name each relevant SOP, summarise procedure, list required documents, state GOV-2026 deadline.
+SECTION 2 - CASE PRIORITISATION (Dual criteria: deadline + consequence severity):
+  Critical: Deadline within 14 days OR CRITICAL/HIGH consequence
+  High: Deadline within 30 days OR HIGH consequence OR blocks Critical item
+  List each item with deadline, consequence level, and SOP reference.
+SECTION 3 - WORKFLOW COORDINATION: Run SOP-001 completeness check first. Map all dependencies, blockers, numbered action sequence.
+SECTION 4 - FLAGS: [URGENT] if any deadline within 72 hours. [VERIFY] for all eligibility determinations. List all missing documents.
+
+CASE PROFILE:`
+  }
+};
+
+// ════════════════════════════════════════════════════════════════
+// ALL 8 TEST CASES 
+// ════════════════════════════════════════════════════════════════
+const TEST_CASES = [
+  {
+    id:'TC-01', label:'Baseline — Straightforward', complexity:'low', fn:'priority',
+    text:`Family: Al-Rashid family — 2 parents, children aged 8 and 11.
+Arrival: 6 weeks ago.
+Legal Status: Asylum application submitted; pending decision (no deadline risk).
+Housing: Stable temporary accommodation, 3 months remaining.
+Healthcare: Both adults registered with NHIF. Children NOT yet registered.
+Education: Neither child enrolled in school.
+Financial: DRS Transitional Cash Assistance (TCA) approved and active.
+Language Training: Not yet registered.`
+  },
+  {
+    id:'TC-02', label:'Deadline Pressure — Housing Crisis', complexity:'med', fn:'priority',
+    text:`Family: Tekle family — single mother, 3 children aged 4, 9, 14.
+Arrival: 3 weeks ago.
+Legal Status: Temporary Protection Status granted (Kenya Refugees Act 2021).
+Housing: Temporary housing EXPIRES IN 8 DAYS. No permanent placement yet.
+Healthcare: No healthcare registration completed for ANY family member.
+Education: 14-year-old enrolled. 9-year-old and 4-year-old NOT enrolled.
+Financial: Cash assistance PENDING — proof of address required by DRS.
+Language Training: Not yet started.`
+  },
+  {
+    id:'TC-03', label:'Dependency Chain — Complex', complexity:'high', fn:'workflow',
+    text:`Family: Haidari family — 2 parents, 1 child aged 6, 1 elderly grandparent (72).
+Arrival: 5 weeks ago.
+Legal Status: Full refugee status recognised.
+Housing: Lease signed; MOVE-IN DATE IS IN 12 DAYS. Currently in emergency shelter.
+Healthcare: Parents registered with NHIF. Child and grandparent NOT registered.
+Education: Child NOT enrolled — school told caseworker they need proof of residence first.
+Financial: DRS TCA approved; transition to regular social support pending (requires NHIF registration for ALL family members).
+Pending actions: Complete child NHIF registration, complete grandparent NHIF registration, obtain proof of residence after lease signing, initiate school enrolment, confirm KPLC electricity registration, follow up on benefit transition.`
+  },
+  {
+    id:'TC-04', label:'Eligibility Edge Case — Separate Arrival', complexity:'high', fn:'policy',
+    text:`The Mahmoud family's 17-year-old son arrived in Kenya 4 months after the rest of the family, on a separate visa processed through a different UNHCR office in Ethiopia. The primary applicant (the father) arrived 5 months ago and has been receiving DRS TCA cash assistance since Day 7. Does the son fall under the same TCA entitlement as the parents under the Kenya Refugees Act 2021, or is his case assessed independently by the Department of Refugee Services? What is his eligibility window?`
+  },
+  {
+    id:'TC-05', label:'Hallucination Guard — Out-of-KB', complexity:'high', fn:'policy',
+    text:`A colleague told me that Nairobi City County launched a new urban refugee integration programme last month that provides additional housing subsidies for families in Eastleigh. Can I refer the Okonkwo family to this programme? They have been in Kenya for 4 months and are struggling with rent.`
+  },
+  {
+    id:'TC-06', label:'Specialist Referral — Mental Health', complexity:'med', fn:'policy',
+    text:`The Abdi family has been with us for 3 weeks. During the intake vulnerability assessment, the mother disclosed a history of trauma and has shown signs of severe depression. The family is now NHIF registered. How do I refer her to mental health support? What specific providers are available and what documents does the referral need?`
+  },
+  {
+    id:'TC-07', label:'Multi-Adult Livelihoods Eligibility', complexity:'high', fn:'policy',
+    text:`The Tesfaye family has three adults: the primary applicant (husband, arrived 2 months ago), his wife (arrived with him, 2 months ago), and the wife's brother (arrived separately 6 weeks ago on a different UNHCR referral). All three want to register for language and livelihoods training under SOP-031 (UNHCR Kenya / Don Bosco Programme). Are there any differences in how we process their registrations? Does the brother's separate arrival affect anything?`
+  },
+  {
+    id:'TC-08', label:'Full Stress Test — All Layers', complexity:'vhigh', fn:'combined',
+    text:`Family: Nkosi family — father, mother, grandmother (68, diabetic, requires insulin), 3 children (ages 3, 7, 15).
+Arrival: 18 days ago.
+Legal Status: Refugee status recognised.
+Housing: Emergency shelter. Permanent housing — landlord identified from REF-002, inspection passed, but LEASE NOT YET SIGNED.
+Healthcare: Father NHIF registered. Mother, grandmother, and all 3 children NOT registered. Grandmother requires urgent insulin prescription — no healthcare provider assigned yet.
+Education: 15-year-old enrolled. 7-year-old NOT enrolled — school said they need proof of residence. 3-year-old not yet assessed for PP1.
+Financial: TCA application NOT YET SUBMITTED.
+Language Training: Parents not yet registered.
+Additional: A cousin (adult male) is arriving from Uganda next week on a separate UNHCR referral.
+Please provide a full assessment.`
+  }
+];
+
+// ════════════════════════════════════════════════════════════════
+// RUN TEST
+// ════════════════════════════════════════════════════════════════
+async function runTest() {
+  const apiKey = document.getElementById('api-key').value.trim();
+  const modelId = document.getElementById('model-select').value;
+  const userInput = document.getElementById('user-input').value.trim();
+  
+  if(!apiKey) { toast('Enter Gemini API key', 'warn'); return; }
+  if(!userInput) { toast('Enter text or select test case', 'warn'); return; }
+
+  document.getElementById('run-btn').disabled = true;
+  document.getElementById('status-pill').textContent = '● Running';
+  document.getElementById('status-pill').style.color = '#f9cb42';
+
+  const outputBody = document.getElementById('output-body');
+  outputBody.innerHTML = `<div class="thinking"><div class="thinking-dots"><span></span><span></span><span></span></div>Gemini is processing via v1beta...</div>`;
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${apiKey}`;
+  const fnPrompt = FN_PROMPTS[currentFunction][`v${currentVersion}`];
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: SYSTEM_BASE }] },
+        contents: [{ role: 'user', parts: [{ text: fnPrompt + '\n\n' + userInput }] }],
+        generationConfig: {
+          temperature: 0.2,
+          maxOutputTokens: 8192,
+          topP: 0.8
+        }
+      })
+    });
+
+    const data = await response.json();
+    
+    if (data.error) { throw new Error(data.error.message || 'API Error'); }
+
+    const resultText = data.candidates?.[0]?.content?.parts?.[0]?.text || '[No response]';
+    lastResponse = resultText;
+
+    outputBody.innerHTML = '';
+    if(resultText.includes('[URGENT')) {
+      outputBody.innerHTML += `<div class="flag flag-urgent"><span class="flag-icon">⚠</span><span><strong>URGENT ESCALATION REQUIRED</strong></span></div>`;
+    }
+    if(resultText.includes('[VERIFY]')) {
+      outputBody.innerHTML += `<div class="flag flag-verify"><span class="flag-icon">◎</span><span><strong>VERIFICATION REQUIRED</strong></span></div>`;
+    }
+
+    const textEl = document.createElement('div');
+    textEl.className = 'response-text';
+    textEl.textContent = resultText;
+    outputBody.appendChild(textEl);
+
+    document.getElementById('status-pill').textContent = '● Complete';
+    document.getElementById('status-pill').style.color = '#5dcaa5';
+    resetScores();
+
+  } catch (e) {
+    outputBody.innerHTML = `<div class="flag flag-urgent"><strong>Error:</strong> ${e.message}</div>`;
+    document.getElementById('status-pill').textContent = '● Error';
+    toast(e.message, 'error');
+  } finally {
+    document.getElementById('run-btn').disabled = false;
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+// UI LOGIC
+// ════════════════════════════════════════════════════════════════
+function init() {
+  renderTCList();
+  renderStars('accuracy');
+  renderStars('completeness');
+  renderStars('clarity');
+  updatePromptPreview();
+}
+
+function renderTCList() {
+  const list = document.getElementById('tc-list');
+  list.innerHTML = TEST_CASES.map(tc => `
+    <button class="tc-btn${currentTC===tc.id?' active':''}" onclick="loadTC('${tc.id}')" id="tcbtn-${tc.id}">
+      <span class="tc-id">${tc.id}</span>
+      <span class="tc-label">${tc.label}</span>
+      <span class="tc-complexity cx-${tc.complexity}">${tc.complexity}</span>
+    </button>
+  `).join('');
+}
+
+function loadTC(id) {
+  const tc = TEST_CASES.find(t=>t.id===id);
+  if(!tc) return;
+  currentTC = id;
+  document.getElementById('user-input').value = tc.text;
+  selectFunction(tc.fn);
+  document.querySelectorAll('.tc-btn').forEach(b=>b.classList.remove('active'));
+  const btn = document.getElementById(`tcbtn-${id}`);
+  if(btn) btn.classList.add('active');
+  document.getElementById('mp-tc').textContent = id;
+  const ind = document.getElementById('active-indicator');
+  if(ind) ind.textContent = `Active: ${id} · ${tc.fn} · V${currentVersion}`;
+  const hint = document.getElementById('token-hint');
+  if(hint) hint.textContent = `~${Math.round(tc.text.length/4)} tokens input`;
+}
+
+function selectFunction(fn) {
+  currentFunction = fn;
+  document.querySelectorAll('.fn-btn').forEach(b=>b.classList.remove('active'));
+  const btn = document.getElementById(`fn-${fn}`);
+  if(btn) btn.classList.add('active');
+  const labels = {policy:'Policy Navigation', priority:'Case Prioritisation', workflow:'Workflow Coordination', combined:'Combined Assessment'};
+  document.getElementById('mp-fn').textContent = labels[fn] || fn;
+  const titles = {policy:'Policy Navigation — Caseworker Query', priority:'Case Prioritisation — Family Profile', workflow:'Workflow Coordination — Pending Actions', combined:'Combined Assessment — Full Case Profile'};
+  const titleEl = document.getElementById('ic-title');
+  if(titleEl) titleEl.textContent = titles[fn] || fn;
+  updatePromptPreview();
+}
+
+function selectVersion(v) {
+  currentVersion = v;
+  document.getElementById('ver-1').classList.toggle('active', v===1);
+  document.getElementById('ver-2').classList.toggle('active', v===2);
+  const notes = {
+    1: 'V1: Initial design. Run this first to generate baseline scores.',
+    2: 'V2: Enhanced prompts with dependency checks, completeness verification, and dual prioritisation.'
+  };
+  document.getElementById('ver-note').textContent = notes[v];
+  document.getElementById('mp-ver').textContent = `V${v}`;
+  // If a test case is active, reload its correct function so the function
+  // selector always matches the TC being tested
+  if(currentTC) {
+    const tc = TEST_CASES.find(t => t.id === currentTC);
+    if(tc && tc.fn !== currentFunction) {
+      selectFunction(tc.fn);
+    }
+  }
+  updatePromptPreview();
+}
+
+function renderStars(dim) {
+  const el = document.getElementById(`stars-${dim}`);
+  el.innerHTML = [1,2,3,4,5].map(n=>`
+    <button class="star${scores[dim]>=n?' selected':''}" onclick="setStar('${dim}',${n})">${n}</button>
+  `).join('');
+}
+
+function setStar(dim, val) {
+  scores[dim] = val;
+  renderStars(dim);
+  const avg = (Object.values(scores).reduce((a,b)=>a+b,0)/3).toFixed(1);
+  document.getElementById(`val-${dim}`).textContent = val+'/5';
+  document.getElementById('avg-score').textContent = avg+'/5';
+}
+
+function saveScore() {
+  if(!lastResponse) return;
+  const avg = (Object.values(scores).reduce((a,b)=>a+b,0)/3).toFixed(1);
+  logEntries.push({
+    tc: currentTC||'Custom',
+    fn: currentFunction,
+    ver: currentVersion,
+    model: document.getElementById('model-select').value,
+    accuracy: scores.accuracy,
+    completeness: scores.completeness,
+    clarity: scores.clarity,
+    avg: avg,
+    pass: scores.accuracy >= 3 && scores.completeness >= 3 && scores.clarity >= 3,
+    notes: document.getElementById('score-notes').value
+  });
+  renderLog();
+  toast('Log Saved');
+}
+
+function renderLog() {
+  const tbody = document.getElementById('log-body');
+  if(!logEntries.length) return;
+  tbody.innerHTML = logEntries.map(e=>`
+    <tr><td>${e.tc}</td><td>${e.fn}</td><td>V${e.ver}</td><td>${e.model}</td><td>${e.accuracy}</td><td>${e.completeness}</td><td>${e.clarity}</td><td><strong>${e.avg}</strong></td><td><span class="pass-badge ${e.pass?'pass-yes':'pass-no'}">${e.pass?'PASS':'FAIL'}</span></td><td>${e.notes}</td></tr>
+  `).join('');
+}
+
+function updatePromptPreview() {
+  const p = FN_PROMPTS[currentFunction][`v${currentVersion}`];
+  document.getElementById('prompt-preview-text').innerHTML = `<span class="cm">// GEMINI SYSTEM INSTRUCTION</span>\n${SYSTEM_BASE.substring(0, 80)}...\n\n<span class="kw">// USER PART</span>\n${p}`;
+}
+
+function switchTab(t) {
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tab-input').style.display = t==='input'?'block':'none';
+  document.getElementById('tab-prompt').style.display = t==='prompt'?'block':'none';
+}
+
+function toast(m) {
+  const w = document.getElementById('toast-wrap');
+  const t = document.createElement('div');
+  t.className = 'toast'; t.textContent = m;
+  w.appendChild(t); setTimeout(()=>t.remove(), 2500);
+}
+
+function exportCSV() {
+  const csv = "TC,Function,Ver,Model,Acc,Comp,Clar,Avg,Pass,Notes\n" + logEntries.map(e=>`${e.tc},${e.fn},${e.ver},${e.model},${e.accuracy},${e.completeness},${e.clarity},${e.avg},${e.pass},"${e.notes}"`).join('\n');
+  const blob = new Blob([csv], {type: 'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'rkca_results.csv';
+  a.click();
+}
+
+function clearLog() { logEntries = []; renderLog(); }
+function clearAll() {
+  document.getElementById('user-input').value='';
+  document.getElementById('output-body').innerHTML='<div class="empty-state"><div class="empty-icon">⭡</div><div class="empty-title">No response yet</div><div class="empty-sub">Select a function and test case, then press Run Test.</div></div>';
+  lastResponse='';
+  resetScores();
+  document.querySelectorAll('.tc-btn').forEach(b=>b.classList.remove('active'));
+  currentTC=null;
+  document.getElementById('mp-tc').textContent='—';
+  document.getElementById('status-pill').textContent='● Ready';
+  document.getElementById('status-pill').style.color='';
+}
+function resetScores() { scores = {accuracy:0, completeness:0, clarity:0}; renderStars('accuracy'); renderStars('completeness'); renderStars('clarity'); }
+function updateModelInfo() {
+  const m = document.getElementById('model-select').value;
+  document.getElementById('mp-ver').textContent = `V${currentVersion} · ${m}`;
+}
+
+init();
+</script>
+</body>
+</html>
